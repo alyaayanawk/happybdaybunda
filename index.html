@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5a0f21">
+<title>for bunda</title>
+<style>
+:root{
+  --m1:#9a2442;      /* maroon terang */
+  --m2:#6b1429;      /* maroon tengah */
+  --m3:#3a0a16;      /* maroon gelap */
+  --rose:#f0b8c0;
+  --teks:#fff4f1;
+  --serif:"Times New Roman",Times,serif;
+  --sans:Arial,Helvetica,sans-serif;
+  --kaca:linear-gradient(135deg,rgba(255,255,255,.30) 0%,rgba(255,255,255,.09) 45%,rgba(255,255,255,.16) 100%);
+  --tepi:rgba(255,255,255,.38);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{
+  min-height:100vh;min-height:100dvh;
+  font-family:var(--serif);color:var(--teks);
+  background:linear-gradient(160deg,var(--m1) 0%,var(--m2) 45%,var(--m3) 100%) fixed;
+  overflow-x:hidden;
+}
+/* cahaya lembut di belakang supaya efek kaca terlihat */
+body::before,body::after{
+  content:"";position:fixed;z-index:-1;border-radius:50%;pointer-events:none;
+  filter:blur(60px);
+}
+body::before{width:70vmax;height:70vmax;left:-25vmax;top:-20vmax;background:radial-gradient(circle,rgba(230,90,120,.55),transparent 65%)}
+body::after{width:60vmax;height:60vmax;right:-20vmax;bottom:-20vmax;background:radial-gradient(circle,rgba(190,50,85,.5),transparent 65%)}
+button{font-family:var(--sans);cursor:pointer;border:0;background:none;color:inherit}
+:focus-visible{outline:3px solid #ffd7dc;outline-offset:3px}
+
+/* komponen kaca */
+.kaca{
+  background:var(--kaca);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  backdrop-filter:blur(14px) saturate(140%);
+  border:1px solid var(--tepi);
+  box-shadow:
+    0 18px 40px rgba(30,0,10,.45),
+    inset 0 1px 0 rgba(255,255,255,.55),
+    inset 0 -1px 0 rgba(255,255,255,.12);
+  position:relative;overflow:hidden;
+}
+.kaca::before{ /* kilau miring */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(115deg,rgba(255,255,255,.35) 0%,rgba(255,255,255,0) 34%);
+}
+
+/* ===== TAHAP 1: AMPLOP ===== */
+#intro{
+  position:fixed;inset:0;z-index:10;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(1.4rem,5vh,2.4rem);
+  padding:max(1.2rem,env(safe-area-inset-top)) 1.2rem max(1.2rem,env(safe-area-inset-bottom));
+  transition:opacity .9s ease,visibility .9s;
+}
+#intro.gone{opacity:0;visibility:hidden;pointer-events:none}
+#intro h1{
+  font-weight:normal;font-style:italic;text-align:center;line-height:1.25;
+  font-size:clamp(1.55rem,6.5vw,2.6rem);text-shadow:0 2px 14px rgba(40,0,15,.5);
+}
+#intro h1 small{display:block;margin-top:.55rem;font-size:.55em;font-style:normal;font-family:var(--sans);color:var(--rose)}
+
+.envelope{position:relative;width:min(86vw,380px);aspect-ratio:3/2;perspective:900px;filter:drop-shadow(0 22px 30px rgba(25,0,8,.5))}
+.env-back{position:absolute;inset:0;border-radius:8px;background:linear-gradient(160deg,#7a1a34,#4d0f20)}
+.env-letter{
+  position:absolute;left:7%;right:7%;top:8%;height:78%;border-radius:4px;
+  background:linear-gradient(160deg,#fff1ee,#f1c9cf);
+  transition:transform 1s .5s cubic-bezier(.6,.1,.2,1);
+}
+.env-front{
+  position:absolute;inset:0;border-radius:8px;
+  clip-path:polygon(0 0,50% 55%,100% 0,100% 100%,0 100%);
+  background:linear-gradient(150deg,#b23050 0%,#8a1d37 50%,#5e1226 100%);
+}
+.env-front::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.28),rgba(255,255,255,0) 40%)}
+.env-flap{
+  position:absolute;left:0;right:0;top:0;height:58%;z-index:3;
+  transform-origin:top center;backface-visibility:hidden;
+  clip-path:polygon(0 0,100% 0,50% 100%);
+  background:linear-gradient(180deg,#c13a5b,#9a2442);
+  transition:transform .9s cubic-bezier(.5,.1,.2,1),z-index 0s .45s;
+}
+.envelope.open .env-flap{transform:rotateX(180deg);z-index:0}
+.envelope.open .env-letter{transform:translateY(-38%)}
+.seal{
+  position:absolute;left:50%;top:48%;width:64px;height:64px;margin:-32px 0 0 -32px;z-index:4;
+  border-radius:50%;display:grid;place-items:center;font-size:1.6rem;color:#ffe3e7;
+  background:radial-gradient(circle at 32% 28%,#ff9fb0 0%,#d63d5f 30%,#8c1330 75%);
+  box-shadow:0 6px 14px rgba(0,0,0,.4),inset 0 2px 3px rgba(255,255,255,.6),inset 0 -3px 6px rgba(60,0,15,.5);
+  transition:opacity .4s,transform .4s;
+}
+.envelope.open .seal{opacity:0;transform:scale(.4)}
+
+.open-btn{
+  min-height:52px;padding:0 2.4rem;border-radius:999px;
+  font-size:1.05rem;font-weight:bold;letter-spacing:.02em;color:#fff;
+  background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,.12) 55%,rgba(255,255,255,.2));
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.55);
+  box-shadow:0 10px 24px rgba(30,0,10,.4),inset 0 1px 0 rgba(255,255,255,.7);
+  transition:transform .2s,opacity .5s;
+}
+.open-btn:active{transform:scale(.97)}
+
+/* ===== TAHAP 2: SURAT + FOTO ===== */
+#main{
+  min-height:100vh;min-height:100dvh;
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);
+  gap:clamp(1.5rem,4vw,4rem);align-items:center;
+  max-width:1180px;margin:0 auto;
+  padding:clamp(1.2rem,5vw,4rem);
+  padding-bottom:max(5rem,calc(env(safe-area-inset-bottom) + 4.5rem));
+  opacity:0;visibility:hidden;transition:opacity 1.2s .3s;
+}
+#main.show{opacity:1;visibility:visible}
+
+.letter{
+  border-radius:18px;
+  padding:clamp(1.4rem,5vw,3rem);
+}
+.letter > *{position:relative}
+.letter h2{
+  font-weight:bold;font-size:clamp(1.7rem,6vw,2.5rem);line-height:1.15;margin-bottom:1.1rem;
+  text-shadow:0 1px 10px rgba(40,0,15,.35);
+}
+.letter p{
+  font-size:clamp(1.05rem,3.9vw,1.3rem);line-height:1.75;margin-bottom:1.1rem;
+  max-width:62ch;
+}
+.letter .sign{font-style:italic;margin:1.6rem 0 0;font-size:clamp(1.15rem,4.2vw,1.4rem)}
+.reveal{opacity:0;transform:translateY(10px);transition:opacity 1s ease,transform 1s ease}
+.reveal.in{opacity:1;transform:none}
+
+.photos{position:relative;height:clamp(380px,104vw,540px);display:grid;place-items:center}
+.pol{
+  position:absolute;width:min(68%,290px);padding:10px 10px 46px;border-radius:4px;
+  background:#fff;
+  box-shadow:0 14px 30px rgba(30,0,10,.45);
+  transition:transform 1.1s cubic-bezier(.4,0,.2,1),opacity .9s ease;
+  will-change:transform,opacity;
+  pointer-events:none;
+}
+.pol .inner{position:relative}
+.pol.vis .inner{animation:ayun 6s ease-in-out infinite alternate}
+@keyframes ayun{from{transform:translateY(-5px) rotate(-1deg)}to{transform:translateY(5px) rotate(1deg)}}
+.pol .frame{aspect-ratio:4/5;overflow:hidden;border-radius:2px;background:#eee}
+.pol img{width:100%;height:100%;object-fit:cover;display:block}
+.pol.depan img{animation:zoom 9s ease-in-out infinite alternate}
+@keyframes zoom{from{transform:scale(1)}to{transform:scale(1.12)}}
+.pol .cap{position:absolute;left:0;right:0;bottom:-34px;text-align:center;font-family:var(--sans);font-size:.85rem;color:var(--m2)}
+.pol .kosong{width:100%;height:100%;display:grid;place-items:center;text-align:center;padding:1rem;font-family:var(--sans);font-size:.8rem;color:var(--m2)}
+
+#musik{
+  position:fixed;z-index:20;right:max(1rem,env(safe-area-inset-right));bottom:max(1rem,env(safe-area-inset-bottom));
+  width:52px;height:52px;border-radius:50%;display:none;place-items:center;font-size:1.25rem;
+  background:var(--kaca);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  border:1px solid var(--tepi);box-shadow:0 8px 20px rgba(30,0,10,.4),inset 0 1px 0 rgba(255,255,255,.5);
+}
+#musik.on{display:grid}
+
+
+/* efek mengetik */
+#surat .reveal{white-space:pre-line}
+#surat .s{opacity:0}
+.mengetik .t::after{
+  content:"";display:inline-block;width:2px;height:1em;margin-left:2px;
+  background:currentColor;vertical-align:-.15em;animation:kedip 1s steps(1) infinite;
+}
+@keyframes kedip{50%{opacity:0}}
+
+/* layar lebar: surat panjang, foto tetap menempel di layar saat scroll */
+@media (min-width:821px){
+  #main{align-items:start}
+  .photos{position:sticky;top:max(1rem,calc((100dvh - 540px)/2));align-self:start}
+}
+
+/* HP & layar sempit */
+@media (max-width:820px){
+  #main{grid-template-columns:1fr;align-items:start;padding-top:max(1.2rem,env(safe-area-inset-top))}
+  .photos{order:-1}
+}
+@media (max-width:380px){
+  .envelope{width:90vw}
+  .seal{width:54px;height:54px;margin:-27px 0 0 -27px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition-duration:.01s!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<section id="intro">
+  <h1 id="judul-intro"></h1>
+  <div class="envelope" id="amplop" aria-hidden="true">
+    <div class="env-back"></div>
+    <div class="env-letter"></div>
+    <div class="env-front"></div>
+    <div class="env-flap"></div>
+    <div class="seal">♥</div>
+  </div>
+  <button class="open-btn" id="btn-buka">open letter</button>
+</section>
+
+<main id="main">
+  <article class="letter kaca" id="surat"></article>
+  <div class="photos" id="foto" aria-label="Foto kenangan"></div>
+</main>
+
+<button id="musik" aria-label="Jeda atau putar lagu">♪</button>
+<audio id="lagu" src="assets/Sempurna.mp3" loop preload="auto"></audio>
+
+<script>
+/* =====================================================
+   EDIT BAGIAN INI SAJA
+   ===================================================== */
+const NAMA_BUNDA = "bunda";
+const DARI       = "aya";
+const JUDUL      = "hai bunda, aya ada kado buat bunda!";
+
+const SURAT = [
+  "selamat ulang tahun, bunda. ",
+  "hari ini aya mau bilang terima kasih buat semua hal yang selama ini bunda lakuin buat aya, dede & papah. terima kasih udah selalu sabar menghadapi aya, selalu nunggu kabar aya, selalu khawatir sama aya & selalu berusaha memberikan yang terbaik buat keluarga.",
+  "makasih udah mau jadi orang tua sekaligus teman buat aya. makasih udah pilih buat melahirkan aya ke dunia ini dan sudah menemani aya tumbuh sampai sekarang. makasih karena selama ini bunda selalu jadi tempat aya cerita, tempat aya mengeluh, sharing hal hal kecil, bahkan cerita tentang hal hal yang mungkin menurut orang lain sepele. makasih udah mau dengerin semua cerita aya dan selalu berusaha memahami aya.",
+  "makasih juga karena udah ikut memperhatikan hal hal yang aya suka, sering beliin sesuatu yang bikin aya senang. mungkin buat bunda itu hal sederhana, tapi buat aya semua perhatian kecil itu berarti. aya senang karena bunda ga cuma perhatiin kebutuhan aya, tapi juga hal hal kecil yang bisa bikin aya bahagia. makasih udah selalu berusaha membuat aya merasa disayang.",
+  "bunda, tolong hidup lebih lama lagi buat aya, dede, dan papah, ya. aya masih mau punya banyak waktu sama bunda. masih mau denger bunda cerita, masih mau denger bunda cerewet, bawel, bahkan marah marah kalo aya salah. tolong jangan pernah berhenti ngingetin aya & jangan pernah capek buat negur aya kalo aya ngelakuin kesalahan. karena aya tau, semua itu bunda lakuin karna bunda sayang & pengen aya jadi lebih baik.",
+  "aya juga pengen bunda terus doain aya di setiap langkah yang aya ambil. tolong tetap dukung aya, tetap percaya sama aya, dan tetap kasih semangat buat setiap proses yang lagi aya jalanin, karna tanpa bunda sama papa, aya bukan siapa siapa dan ga akan jadi apa apa. aya tau mungkin ga semua keputusan yang aya ambil selalu benar & ga semua jalan yang aya pilih itu gampang. tapi aya berharap bunda selalu ada buat dengerin cerita aya, kasih masukan kalo aya bingung, dan mengingatkan aya kalo aya mulai salah arah. aya masih butuh doa, nasihat, sama dukungan bunda dalam setiap perjalanan hidup aya. semoga apa pun yang sedang dan akan aya usahakan bisa jadi sesuatu yang membanggakan bunda & papa.",
+  "maaf kalau selama ini aya masih sering bikin bunda khawatir, masih suka susah dibilangin, atau kadang belum bisa jadi anak yang bunda harapkan. aya masih banyak belajar dan masih banyak kurangnya. tapi aya selalu berusaha buat jadi anak yang lebih baik, yang nantinya bisa bikin bunda bangga dan bahagia.",
+  "semoga bunda selalu sehat, panjang umur, bahagia, dan selalu diberikan hal-hal baik. jangan terlalu sering cape, jangan terlalu banyak pikiran, dan jangan lupa bahagiain diri bunda sendiri yaa. aya pengin bunda bisa menikmati banyak hal baik dalam hidup, bukan cuma sibuk mikirin dan ngurusin anak-anaknya.",
+  "aya mungkin belum bisa ngebles semua yang udah bunda kasih, tapi aya berharap masih punya banyak kesempatan buat ngebahagiain bunda. semoga aya masih bisa terus tumbuh dengan bunda di samping aya, masih bisa cerita banyak hal, masih bisa berbagi kesenangan kecil, dan masih bisa pulang ke rumah dengan bunda yang selalu menyambut aya.",
+  "dan satu hal lagi, apa pun yang orang lain omongin tentang bunda, bagaimana pun orang lain menilai bunda, aya ga peduli. karna buat aya, bunda tetap bunda yang hebat dan berhasil. mungkin bunda punya kekurangan, mungkin ga semua hal dalam hidup berjalan sesuai harapan bunda, tapi itu ga pernah mengurangi rasa bangga aya punya bunda seperti bunda. aya tau bunda udah berusaha ngelakuin yang terbaik dengan segala cara yang bunda bisa. jadi, jangan pernah merasa kalo bunda adalah orang yang gagal, ya. karena di mata aya, bunda sosok yang terbaik. aya bangga punya bunda, dan aya akan selalu bangga jadi anak bunda.",
+  "sekali lagi, selamat ulang tahun, bunda. tolong sehat dan panjang umur terus, ya. aya, dede, dan papah masih butuh bunda. semoga aya masih bisa merayakan banyak ulang tahun bunda berikutnya, masih bisa memeluk bunda, dan masih bisa bilang langsung kalau aya sayang banget sama bunda.",
+  "aya sayang bunda, selalu."
+];
+
+// 10 foto: ada di folder assets/ dengan nama b1.jpeg sampai b10.jpeg
+// Ubah tulisan di bawah foto lewat "cap".
+const FOTO = [
+  { src: "assets/b1.jpeg", cap: "♡" },
+  { src: "assets/b2.jpeg", cap: "(˶˃ ᵕ ˂˶)" },
+  { src: "assets/b3.jpeg", cap: "𐔌՞ ܸ.ˬ.ܸ՞𐦯" },
+  { src: "assets/b4.jpeg", cap: "⸜(｡˃ ᵕ ˂ )⸝♡" },
+  { src: "assets/b5.jpeg", cap: "(˶ˆᗜˆ˵)" },
+  { src: "assets/b6.jpeg", cap: "ℓo͟v͟ꫀ ყoυ .ᐟ" },
+  { src: "assets/b7.jpeg", cap: "(๑ᵔ⤙ᵔ๑)" },
+  { src: "assets/b8.jpeg", cap: "︵︵︵ ๑ ♡ ๑ ︵︵︵" },
+  { src: "assets/b9.jpeg", cap: "◝(ᵔᗜᵔ)◜" },
+  { src: "assets/b10.jpeg", cap: "7.11.2026" }
+];
+/* ===================================================== */
+
+const $ = id => document.getElementById(id);
+
+$("judul-intro").innerHTML = JUDUL + "<small>untuk " + NAMA_BUNDA + "</small>";
+$("surat").innerHTML =
+  '<h2 class="reveal">selamat bertambah usia, bunda.</h2>' +
+  SURAT.map(t => '<p class="reveal">' + t + "</p>").join("") +
+  '<p class="sign reveal">with love,<br>' + DARI + "</p>";
+
+// foto
+const wadah = $("foto");
+FOTO.forEach(f => {
+  const d = document.createElement("div");
+  d.className = "pol";
+  d.innerHTML =
+    '<div class="inner"><div class="frame"><img alt="' + f.cap + '" src="' + f.src + '" decoding="async"></div>' +
+    '<div class="cap">' + f.cap + "</div></div>";
+  const img = d.querySelector("img");
+  img.onerror = () => { img.parentNode.innerHTML = '<div class="kosong">Taruh foto di<br>' + f.src + "</div>"; };
+  wadah.appendChild(d);
+});
+
+const kartu = [...wadah.children];
+let urutan = kartu.map((_, i) => i);
+const slot = [
+  { x: 0,   y: 0,  r: -3, s: 1 },
+  { x: 34,  y: 8,  r: 7,  s: .93 },
+  { x: -34, y: 14, r: -8, s: .88 }
+];
+const BELAKANG = "translate(0%,6%) rotate(0deg) scale(.8)";
+function tata(){
+  urutan.forEach((idx, pos) => {
+    const k = kartu[idx];
+    const tampil = pos < slot.length;
+    const p = tampil ? slot[pos] : null;
+    k.style.zIndex = tampil ? 10 - pos : 0;
+    k.style.opacity = tampil ? 1 : 0;
+    k.style.transform = tampil
+      ? "translate(" + p.x + "%," + p.y + "%) rotate(" + p.r + "deg) scale(" + p.s + ")"
+      : BELAKANG;
+    k.classList.toggle("vis", tampil);
+    k.classList.toggle("depan", pos === 0);
+  });
+}
+tata();
+
+// foto depan meluncur keluar sambil memudar, yang lain naik pelan-pelan,
+// lalu foto yang keluar disimpan diam-diam di belakang tumpukan
+function lanjut(){
+  const idx = urutan.shift();
+  const k = kartu[idx];
+  k.classList.remove("depan");
+  k.style.zIndex = 20;
+  k.style.opacity = 0;
+  k.style.transform = "translate(115%,-4%) rotate(16deg) scale(1)";
+  tata();
+  setTimeout(() => {
+    k.style.transition = "none";
+    k.style.transform = BELAKANG;
+    k.style.zIndex = 0;
+    void k.offsetWidth;
+    k.style.transition = "";
+    urutan.push(idx);
+    tata();
+  }, 1200);
+}
+if (kartu.length > 1) setInterval(lanjut, 4500);
+
+// efek mengetik: teks surat muncul huruf demi huruf
+const KECEPATAN = 20;   // ms per huruf (makin kecil makin cepat)
+const ketikEls = [];
+let terakhirGeser = 0;
+["wheel","touchstart","touchmove","keydown"].forEach(ev =>
+  window.addEventListener(ev, () => { terakhirGeser = Date.now(); }, { passive: true }));
+
+function siapkanKetik(){
+  document.querySelectorAll("#surat .reveal").forEach(el => {
+    const tmp = document.createElement("div");
+    tmp.innerHTML = el.innerHTML.replace(/<br\s*\/?>/gi, "\n");
+    const teks = tmp.textContent;
+    el.innerHTML = "";
+    const t = document.createElement("span"); t.className = "t";
+    const sisa = document.createElement("span"); sisa.className = "s"; sisa.textContent = teks;
+    el.append(t, sisa);
+    el.style.transitionDelay = "0s";
+    el.classList.add("in");
+    ketikEls.push({ el, t, sisa, teks, huruf: Array.from(teks) });
+  });
+}
+// ikut menggulung layar ke bawah mengikuti teks yang sedang diketik
+// (berhenti 3 detik kalau pembaca menggeser layar sendiri)
+function ikuti(t){
+  if (Date.now() - terakhirGeser < 3000) return;
+  const batas = window.innerHeight - 100;
+  const bawah = t.getBoundingClientRect().bottom;
+  if (bawah > batas) window.scrollBy({ top: bawah - batas, behavior: "smooth" });
+}
+function ketik(i){
+  if (i >= ketikEls.length) return;
+  const { el, t, sisa, huruf } = ketikEls[i];
+  el.classList.add("mengetik");
+  let n = 0;
+  (function langkah(){
+    n++;
+    t.textContent = huruf.slice(0, n).join("");
+    sisa.textContent = huruf.slice(n).join("");
+    if (n % 6 === 0) ikuti(t);
+    if (n >= huruf.length) {
+      el.classList.remove("mengetik");
+      setTimeout(() => ketik(i + 1), 600);
+      return;
+    }
+    const c = huruf[n - 1];
+    const jeda = ".!?".includes(c) ? KECEPATAN * 10 : c === "," ? KECEPATAN * 5 : KECEPATAN;
+    setTimeout(langkah, jeda);
+  })();
+}
+function mulaiSurat(){
+  siapkanKetik();
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    ketikEls.forEach(o => { o.t.textContent = o.teks; o.sisa.textContent = ""; });
+    return;
+  }
+  // mulai mengetik begitu bagian atas surat terlihat di layar (di HP surat ada di bawah foto)
+  if ("IntersectionObserver" in window) {
+    const obs = new IntersectionObserver(es => {
+      if (es[0].isIntersecting) { obs.disconnect(); ketik(0); }
+    }, { threshold: 0, rootMargin: "0px 0px -20% 0px" });
+    obs.observe($("surat"));
+  } else {
+    ketik(0);
+  }
+}
+
+// buka surat + lagu (harus dari klik supaya browser mengizinkan suara)
+const lagu = $("lagu");
+$("btn-buka").addEventListener("click", () => {
+  $("btn-buka").disabled = true;
+  $("btn-buka").style.opacity = 0;
+  lagu.volume = 0.8;
+  lagu.play().catch(() => {});
+  $("amplop").classList.add("open");
+  setTimeout(() => $("intro").classList.add("gone"), 1900);
+  setTimeout(() => { $("main").classList.add("show"); $("musik").classList.add("on"); mulaiSurat(); }, 2200);
+});
+
+$("musik").addEventListener("click", () => {
+  if (lagu.paused) { lagu.play(); $("musik").textContent = "♪"; }
+  else { lagu.pause(); $("musik").textContent = "▶"; }
+});
+</script>
+</body>
+</html>
